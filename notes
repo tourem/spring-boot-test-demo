@@ -1,0 +1,106 @@
+Unit and integration Tests with spring boot
+
+- Definitions:
+ unit testing is a type of test to check if an individual small piece of code is doing what it is supposed to do
+ Unit testing is the practice of testing small pieces of code, typically individual functions/method, alone and isolated. 
+ If your test uses some external resource, like the network or a database, it’s not a unit test.
+ Unit tests should be fairly simple to write
+ A good set of unit tests do not only prevent bugs, but also improve your code design, and make sure you can later refactor your code without everything completely breaking apart.
+
+ to unit test, Integration testing is a type of testing to check if different pieces of the modules work together as a whole.
+
+Unit tests
+Run fast! We are talking ms here
+Test your code in isolation
+Mock external dependencies
+Avoid database access, network requests, and the file system
+Be able to run in parallel
+Allow you to practice TDD (if you want)
+A failed unit test is always a regression (if a business has not changed)
+
+Integration tests
+Run reasonably fast. Anywhere from a few seconds to a minute
+Test how your code interacts with the framework
+May or may not mock external dependencies
+May access a local database or filesystem or network
+May or may not run in parallel
+A failed integration test can also mean tha the code is still correct but the environment has changed
+
+http://saradebbaut.com/post/unit-test-vs-integration-test
+
+
+- Des lib : 
+Running Tests : Junit, TestNG
+Testing REST Clients: MockWebServer, wiremock
+Mocking, Stubbing, and Faking Stuff : Mockito, EasyMock, JMockit, PowerMock, Greenmail, MockFtpServer
+Writing Assertions : Hamcrest, AssertJ 
+Testing RESTful Services : REST Assured, Spring test (MockMvc)
+Mutation testing: Pitest
+contract testing: Pact, Spring Cloud Contract 
+testcontainers
+
+- spring-boot-starter-test: contains some testing support libraries such as JUnit, Spring Test + Spring Boot Test, Mockito, AssertJ, Hamcrest and JsonPath.
+
+- The high level architecture of a classic Spring boot web application : https://www.kindsonthegenius.com/spring-boot/2019/06/19/spring-boot-using-h2-database/
+
+
+- Unit test repository with DataJpaTest
+Why unit test repositories?
+There are several cases to test repositories. Of course we don’t test the framework itself. But we do write unit tests to be sure that our specifications or relations have been implemented correctly.
+
+@DataJpaTest Annotation Overview
+Spring Boot provides the @DataJpaTest annotation to test the persistence layer components that will autoconfigure in-memory embedded databases and scan for @Entity classes and Spring Data JPA repositories. The @DataJpaTest annotation doesn’t load other Spring beans (@Components, @Controller, @Service, and annotated beans) into ApplicationContext.
+By default, data JPA tests are transactional and roll back at the end of each test.If that is not what you want, you can disable transaction management for a test
+The @DataJpaTest annotation also autoconfigures TestEntityManager, which is an alternative to the JPA EntityManager to be used in JPA tests.
+
+@JdbcTest, @JooqTest, @DataMongoTest, @DataNeo4jTest, @DataRedisTest, @DataLdapTest 
+
+- Test integ Repository : 
+* SpringBoot provides excellent support for integration testing. We can use @SpringBootTest annotation to load the application context and test various components.
+You can use various webEnvironment values based on how you want to run the tests.
+	•	 MOCK (default)—Loads a WebApplicationContext and provides a mock servlet
+	environment. It will not start an embedded servlet container. If servlet APIs are
+	not on your classpath, this mode will fall back to creating a regular non-web
+	ApplicationContext.
+	•	 NONE—Loads an ApplicationContext using SpringApplication but does not
+	provide a servlet environment.
+	
+* Don't use In-Memory Databases: running tests against in-memory database might give a false impression that it will also work on real production database as well.
+We can use TestContainers support to spin up a postgresql docker container and run the tests pointing to that database.
+* @DataJpaTest
+
+
+- Service : 
+* Unit test: We mock the repository/service.
+* integ test: TestContainers + @SpringBootTest(NONE)
+
+- Controller 
+* Unit test: 
+	* @WebMvcTest + MockMVC annotation, which will autoconfigure SpringMVC infrastructure
+	components and load only @Controller, @ControllerAdvice, @JsonComponent, Filter, WebMvcConfigurer,
+	and HandlerMethodArgumentResolver components. Other Spring beans (annotated with @Component,
+	@Service, @Repository, etc.) will not be scanned when using this annotation.
+	* setting the controllers parameter: telling Spring Boot to restrict the application context created for this test to the given controller bean and some framework beans needed for Spring Web MVC
+
+* integ test: TestContainers + @SpringBootTest annotation with webEnvironment values:
+	•	 RANDOM_PORT—Loads a ServletWebServerApplicationContext and starts an
+	embedded servlet container listening on a random available port.
+	•	 DEFINED_PORT—Loads a ServletWebServerApplicationContext and starts an
+The TestRestTemplate bean will be registered automatically only when @SpringBootTest is started
+	with an embedded servlet container.
+
+
+
+
+
+
+
+
+You'd typically use a full running server if you want to test your application as it will be used in production. With a full running server, you make HTTP requests to the server over a TCP network connection. This involves the network stack and servlet container in the test. By contrast, when you're using Spring MVC test, Spring Framework's DispatcherServlet is called directly with a mock request. The network stack and servlet container are not involved.
+
+DEFINED_PORT means that your server will upon a TCP socket and listen for HTTP requests on a specific port. By default, it's 8080. If you're testing in an environment where you don't know if the specific port will be available, this an lead to test failures due to a port clash.
+
+RANDOM_PORT means that your server will start on a port that's allocated by the operating system and is guaranteed to be available. Spring Boot makes this port available to your application by using the @LocalServerPort annotation on a field in your test class. It also auto-configures the default TestRestTemplate instance to use this port.
+
+
+Next, we are going to write test for UserRepository using @DataJpaTest. But we want to run tests against a real database not with in-memory database. We can use @AutoConfigureTestDatabase(replace=AutoConfigureTestDatabase.Replace.NONE) to turn-off using in-memory database and use the configured database.
