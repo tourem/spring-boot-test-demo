@@ -2,6 +2,7 @@ package com.bnpp.zephyr.demo.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.bnpp.zephyr.demo.config.JpaAuditingConfig;
 import com.bnpp.zephyr.demo.fixture.AnswerFixture;
 import com.bnpp.zephyr.demo.fixture.QuestionFixture;
 import com.bnpp.zephyr.demo.model.Answer;
@@ -12,10 +13,12 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
 
 
 @RunWith(SpringRunner.class)
+@Import(JpaAuditingConfig.class)
 @DataJpaTest
 //disables full auto-configuration and applies only configuration relevant to JPA tests.
 // By default, tests annotated with @DataJpaTest use an embedded in-memory database and @Transactional

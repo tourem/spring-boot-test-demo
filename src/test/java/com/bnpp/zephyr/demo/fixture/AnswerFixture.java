@@ -4,10 +4,11 @@ import com.bnpp.zephyr.demo.model.Answer;
 import com.bnpp.zephyr.demo.model.Question;
 import lombok.experimental.UtilityClass;
 
-@UtilityClass
+//@UtilityClass
 public class AnswerFixture {
 
-  public Answer buildAnswer(Question question, String text) {
+
+  public static Answer buildAnswer(Question question, String text) {
      return new Answer().setQuestion(question).setText(text);
   }
 

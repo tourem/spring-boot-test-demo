@@ -10,13 +10,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+//@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class AnswerService {
 
-  private final AnswerRepository answerRepository;
+  private AnswerRepository answerRepository;
 
-  private final QuestionRepository questionRepository;
+  private QuestionRepository questionRepository;
 
+  @Autowired
+  public AnswerService(AnswerRepository answerRepository,
+      QuestionRepository questionRepository) {
+    this.answerRepository = answerRepository;
+    this.questionRepository = questionRepository;
+  }
 
   public Answer addAnswer(Long questionId, Answer answer) {
     return questionRepository.findById(questionId)
